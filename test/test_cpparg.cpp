@@ -54,6 +54,10 @@ TEST_CASE("app only", "[cpparg]") {
 
 	REQUIRE(result->get_parsed_options().size() == 0);
 
+	REQUIRE(result->get_arguments_for_option("optarg").empty());
+
+	REQUIRE(!result->get_last_argument_for_option("optarg").has_value());
+
 	REQUIRE(result->get_positional_arguments().size() == 0);
 }
 
@@ -313,6 +317,10 @@ TEST_CASE("optarg inline", "[cpparg]") {
 		REQUIRE(result->get_parsed_options().front().arguments.size() == 2);
 		REQUIRE(result->get_parsed_options().front().arguments.front() == "arg1");
 		REQUIRE(result->get_parsed_options().front().arguments.back() == "arg2");
+
+		REQUIRE(result->get_arguments_for_option("optarg").size() == 2);
+
+		REQUIRE(result->get_last_argument_for_option("optarg").value() == "arg2");
 
 		REQUIRE(result->get_positional_arguments().size() == 0);
 	}

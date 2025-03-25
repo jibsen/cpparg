@@ -95,6 +95,8 @@ which is a string describing the error.
 `cpparg::ParseResult` has a number of functions:
 
   - `count("name")` returns the number of times option `name` occured
+  - `get_last_argument_for_option("name")` returns an optional containing
+    the last option argument given for option `name`, if any
   - `get_arguments_for_option("name")` returns a reference to a vector
     containing all the arguments that were provided for the `name` option
   - `get_parsed_options()` returns a reference to a vector of

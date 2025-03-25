@@ -30,6 +30,7 @@
 #include <expected>
 #include <format>
 #include <iterator>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -107,6 +108,17 @@ public:
 		}
 
 		return 0;
+	}
+
+	/// @brief Get last option argument for option `name`.
+	auto get_last_argument_for_option(std::string_view name) const -> std::optional<std::string> {
+		if (auto it = lookup.find(std::string(name)); it != lookup.end()) {
+			if (!parsed_options[it->second].arguments.empty()) {
+				return parsed_options[it->second].arguments.back();
+			}
+		}
+
+		return {};
 	}
 
 	/// @brief Access vector of option arguments for option `name`.
