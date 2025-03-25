@@ -41,6 +41,7 @@ auto main(int argc, char *argv[]) -> int
 		exit(-1);
 	}
 
+	// If the `help` option appeared, show help
 	if (result->count("help")) {
 		std::println(
 			"usage: cpparg_example [options] POSITIONAL_ARG...\n"
@@ -54,6 +55,7 @@ auto main(int argc, char *argv[]) -> int
 		return 0;
 	}
 
+	// Check that at least one positional argument was supplied
 	if (result->get_positional_arguments().size() < 1) {
 		std::println(std::cerr, "usage: cpparg_example [options] POSITIONAL_ARG...\n");
 
