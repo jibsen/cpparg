@@ -1,0 +1,16 @@
+*.o
+*.obj
+
+*.a
+*.lib
+
+*.so
+*.so.*
+*.dll
+
+*.exe
+
+CMakeUserPresets.json
+
+/build*/
+/doc/
