@@ -167,7 +167,7 @@ private:
 	std::unordered_map<std::string, std::size_t> lookup;
 	std::vector<ParsedOption> parsed_options;
 	std::vector<std::string> positional_args;
-	static const std::vector<std::string> empty_arguments;
+	inline static const std::vector<std::string> empty_arguments;
 };
 
 class OptionParser {
