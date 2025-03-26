@@ -318,7 +318,7 @@ public:
 				auto wrapped_description = detail::word_wrap(option.description, line_width - max_option_len);
 
 				for (auto line : wrapped_description) {
-					option_line.append(std::string(leading_space, ' '));
+					option_line.append(leading_space, ' ');
 
 					option_line.append(line);
 					option_line.append("\n");
@@ -327,7 +327,7 @@ public:
 				}
 			}
 			else {
-				option_line.append(std::string(leading_space, ' '));
+				option_line.append(leading_space, ' ');
 				option_line.append(option.description);
 				option_line.append("\n");
 			}
