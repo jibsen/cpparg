@@ -161,8 +161,8 @@ options and positional arguments.
 Only exact matches for long options are supported. You cannot use an
 unambiguous prefix of a long option like with `getopt_long` or `parg`.
 
-`cpparg` provides option arguments only as `std::string`, you have to
-do your own conversion if needed.
+`cpparg` provides option arguments as `std::string`, you have to do your
+own conversion if needed.
 
 ## Alternatives
 
