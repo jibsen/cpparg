@@ -268,30 +268,44 @@ public:
 	/// @param line_width width to word wrap lines at, or 0 to disable
 	/// @return string containing option help
 	auto get_option_help(std::size_t line_width = 0) const -> std::string {
-		std::size_t max_option_len = 0;
+		// Help for each option consists of flags and description.
+		// This is a limit for how long the flags part can be.
+		// Options that exceed this will have their description
+		// start on the next line.
+		constexpr std::size_t flags_len_limit = 29;
 
-		if (line_width && line_width < 29) {
-			line_width = 29;
+		auto max_flags_length = [&] {
+			std::size_t longest_flags = 0;
+
+			for (const auto &option : options) {
+				// Length of "  -f, --" plus long name
+				std::size_t len = 8 + option.long_flag.size();
+
+				len += option.arg_name.size();
+
+				// Two spaces before description
+				len += 2;
+
+				longest_flags = std::max(longest_flags, len);
+			}
+
+			return longest_flags;
+		};
+
+		std::size_t flags_len = std::min(flags_len_limit, max_flags_length());
+
+		// Adjust line width to at least flags_len
+		if (line_width && line_width < flags_len) {
+			line_width = flags_len;
 		}
-
-		for (const auto &option : options) {
-			// Length of "  -f, --" plus long name
-			std::size_t len = 8 + option.long_flag.size();
-
-			len += option.arg_name.size();
-
-			len += 2;
-
-			max_option_len = std::max(max_option_len, len);
-		}
-
-		max_option_len = std::min(std::size_t{29}, max_option_len);
 
 		std::string help;
 
 		for (const auto &option : options) {
+			// Add short flag or space
 			std::string option_line = option.short_flag.empty() ? "    " : std::format("  -{}", option.short_flag);
 
+			// Add long flag if present
 			if (!option.long_flag.empty() && option.long_flag != option.short_flag) {
 				if (!option.short_flag.empty()) {
 					option_line.append(", ");
@@ -303,19 +317,27 @@ public:
 				option_line.append(std::format("--{}", option.long_flag));
 			}
 
+			// Add option argument
 			option_line.append(option.arg_name);
 
-			std::size_t leading_space = max_option_len;
+			// The flags part of the option is done now. We need
+			// to format the description, starting with any
+			// leading space to align all the descriptions, or
+			// possibly a newline if the flags part was too long.
 
-			if (option_line.size() + 2 > max_option_len) {
+			// Find leading space before description for first line
+			std::size_t leading_space = flags_len;
+
+			if (option_line.size() + 2 > flags_len) {
 				option_line.append("\n");
 			}
 			else {
-				leading_space = max_option_len - option_line.size();
+				leading_space = flags_len - option_line.size();
 			}
 
+			// Add description
 			if (line_width) {
-				auto wrapped_description = detail::word_wrap(option.description, line_width - max_option_len);
+				auto wrapped_description = detail::word_wrap(option.description, line_width - flags_len);
 
 				for (auto line : wrapped_description) {
 					option_line.append(leading_space, ' ');
@@ -323,7 +345,7 @@ public:
 					option_line.append(line);
 					option_line.append("\n");
 
-					leading_space = max_option_len;
+					leading_space = flags_len;
 				}
 			}
 			else {
