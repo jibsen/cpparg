@@ -25,14 +25,18 @@
 #define CPPARG_HPP_INCLUDED
 
 #include <algorithm>
+#include <charconv>
 #include <concepts>
 #include <cstddef>
 #include <expected>
 #include <format>
 #include <iterator>
+#include <limits>
 #include <optional>
 #include <string>
 #include <string_view>
+#include <system_error>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -524,6 +528,86 @@ private:
 		});
 	}
 };
+
+/// @brief Convert a string to integral type `T`.
+///
+/// Minus is recognized for both signed and unsigned types.
+///
+/// If `base` is 0, base is auto-detected from the prefix. If the prefix is
+/// "0x" or "0X" base is 16, if the prefix is "0b" or "0B" base is 2, if the
+/// prefix is "0" base is 8, otherwise base is 10.
+///
+template<std::integral T>
+constexpr auto convert_to(std::string_view sv, int base = 10) -> std::expected<T, std::errc> {
+	bool negative = false;
+
+	if (sv.starts_with('-')) {
+		sv.remove_prefix(1);
+		negative = true;
+	}
+
+	if (base == 16 && (sv.starts_with("0x") || sv.starts_with("0X"))) {
+		sv.remove_prefix(2);
+	}
+
+	if (base == 2 && (sv.starts_with("0b") || sv.starts_with("0B"))) {
+		sv.remove_prefix(2);
+	}
+
+	// If base is 0, auto-detect base
+	if (base == 0) {
+		base = 10;
+
+		if (sv.starts_with('0') && sv.size() > 1) {
+			switch (sv[1]) {
+			case 'x':
+			case 'X':
+				sv.remove_prefix(2);
+				base = 16;
+				break;
+			case 'b':
+			case 'B':
+				sv.remove_prefix(2);
+				base = 2;
+				break;
+			default:
+				sv.remove_prefix(1);
+				base = 8;
+				break;
+			}
+		}
+	}
+
+	// Unsigned integer type corresponding to T
+	using UT = std::make_unsigned_t<std::remove_cv_t<T>>;
+
+	UT res{};
+
+	auto [ptr, ec] = std::from_chars(sv.data(), sv.data() + sv.size(), res, base);
+
+	if (ec != std::errc()) {
+		return std::unexpected(ec);
+	}
+
+	if (ptr != sv.data() + sv.size()) {
+		return std::unexpected(std::errc::invalid_argument);
+	}
+
+	// If T is a signed type, check that the unsigned value we read
+	// is within the range of T
+	if constexpr (std::signed_integral<T>) {
+		if (res > static_cast<UT>(std::numeric_limits<T>::max()) + negative) {
+			return std::unexpected(std::errc::result_out_of_range);
+		}
+	}
+
+	// Safely negate the result if needed
+	return static_cast<T>(negative ? (UT(0) - res) : res);
+}
+
+static_assert(cpparg::convert_to<int>("42") == 42);
+static_assert(cpparg::convert_to<int>("-42") == -42);
+static_assert(cpparg::convert_to<unsigned int>("-1") == std::numeric_limits<unsigned int>::max());
 
 } // namespace cpparg
 

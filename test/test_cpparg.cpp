@@ -507,3 +507,82 @@ TEST_CASE("alt argument syntax", "[cpparg]") {
 		REQUIRE(result->get_positional_arguments().size() == 0);
 	}
 }
+
+TEST_CASE("convert_to<signed>", "[cpparg]") {
+	SECTION("simple") {
+		REQUIRE(cpparg::convert_to<int>("42") == 42);
+		REQUIRE(cpparg::convert_to<int>("-42") == -42);
+	}
+
+	SECTION("base 16") {
+		REQUIRE(cpparg::convert_to<int>("0x20", 16) == 32);
+		REQUIRE(cpparg::convert_to<int>("20", 16) == 32);
+		REQUIRE(cpparg::convert_to<int>("-0x20", 16) == -32);
+		REQUIRE(cpparg::convert_to<int>("-20", 16) == -32);
+	}
+
+	SECTION("base 8") {
+		REQUIRE(cpparg::convert_to<int>("0644", 8) == 0b110'100'100);
+		REQUIRE(cpparg::convert_to<int>("644", 8) == 0b110'100'100);
+	}
+
+	SECTION("base 2") {
+		REQUIRE(cpparg::convert_to<int>("0b1011", 2) == 0b1011);
+		REQUIRE(cpparg::convert_to<int>("1011", 2) == 0b1011);
+	}
+
+
+	SECTION("base 0") {
+		REQUIRE(cpparg::convert_to<int>("0x20", 0) == 32);
+		REQUIRE(cpparg::convert_to<int>("-0x20", 0) == -32);
+		REQUIRE(cpparg::convert_to<int>("0644", 0) == 0b110'100'100);
+		REQUIRE(cpparg::convert_to<int>("0b1011", 0) == 0b1011);
+	}
+
+	SECTION("limits") {
+		REQUIRE(cpparg::convert_to<std::int8_t>("127") == 127);
+		REQUIRE(!cpparg::convert_to<std::int8_t>("128"));
+		REQUIRE(cpparg::convert_to<std::int8_t>("-128") == -128);
+		REQUIRE(!cpparg::convert_to<std::int8_t>("-129"));
+	}
+}
+
+TEST_CASE("convert_to<unsigned>", "[cpparg]") {
+	SECTION("simple") {
+		REQUIRE(cpparg::convert_to<unsigned int>("42") == 42U);
+		REQUIRE(cpparg::convert_to<unsigned int>("-42") == -42U);
+	}
+
+	SECTION("base 16") {
+		REQUIRE(cpparg::convert_to<unsigned int>("0x20", 16) == 32U);
+		REQUIRE(cpparg::convert_to<unsigned int>("20", 16) == 32U);
+		REQUIRE(cpparg::convert_to<unsigned int>("-0x20", 16) == -32U);
+		REQUIRE(cpparg::convert_to<unsigned int>("-20", 16) == -32U);
+	}
+
+	SECTION("base 8") {
+		REQUIRE(cpparg::convert_to<unsigned int>("0644", 8) == 0b110'100'100);
+		REQUIRE(cpparg::convert_to<unsigned int>("644", 8) == 0b110'100'100);
+	}
+
+	SECTION("base 2") {
+		REQUIRE(cpparg::convert_to<unsigned int>("0b1011", 2) == 0b1011);
+		REQUIRE(cpparg::convert_to<unsigned int>("1011", 2) == 0b1011);
+	}
+
+
+	SECTION("base 0") {
+		REQUIRE(cpparg::convert_to<unsigned int>("0x20", 0) == 32U);
+		REQUIRE(cpparg::convert_to<unsigned int>("-0x20", 0) == -32U);
+		REQUIRE(cpparg::convert_to<unsigned int>("0644", 0) == 0b110'100'100);
+		REQUIRE(cpparg::convert_to<unsigned int>("0b1011", 0) == 0b1011);
+	}
+
+	SECTION("limits") {
+		REQUIRE(cpparg::convert_to<std::uint8_t>("255") == 255U);
+		REQUIRE(!cpparg::convert_to<std::uint8_t>("256"));
+		REQUIRE(cpparg::convert_to<std::uint8_t>("-1") == 255U);
+		REQUIRE(cpparg::convert_to<std::uint8_t>("-255") == 1U);
+		REQUIRE(!cpparg::convert_to<std::uint8_t>("-256"));
+	}
+}
