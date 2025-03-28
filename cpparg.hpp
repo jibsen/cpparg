@@ -25,6 +25,7 @@
 #define CPPARG_HPP_INCLUDED
 
 #include <algorithm>
+#include <cctype>
 #include <charconv>
 #include <concepts>
 #include <cstddef>
@@ -88,6 +89,18 @@ constexpr auto word_wrap(std::string_view sv, std::size_t width) {
 
 	return res;
 }
+
+/// @brief Case insensitive string equality (in C locale)
+inline auto iequal(std::string_view lhs, std::string_view rhs) -> bool {
+	return std::ranges::equal(lhs, rhs,
+		[](unsigned char lch, unsigned char rch) {
+			return std::tolower(lch) == std::tolower(rch);
+		}
+	);
+}
+
+template<typename T>
+concept NonBoolIntegral = std::integral<T> && !std::same_as<std::remove_cv_t<T>, bool>;
 
 } // namespace detail
 
@@ -529,7 +542,7 @@ private:
 	}
 };
 
-/// @brief Convert a string to integral type `T`.
+/// @brief Convert a string to integral type `T` (except `bool`).
 ///
 /// Minus is recognized for both signed and unsigned types.
 ///
@@ -537,7 +550,7 @@ private:
 /// "0x" or "0X" base is 16, if the prefix is "0b" or "0B" base is 2, if the
 /// prefix is "0" base is 8, otherwise base is 10.
 ///
-template<std::integral T>
+template<detail::NonBoolIntegral T>
 constexpr auto convert_to(std::string_view sv, int base = 10) -> std::expected<T, std::errc> {
 	bool negative = false;
 
@@ -608,6 +621,25 @@ constexpr auto convert_to(std::string_view sv, int base = 10) -> std::expected<T
 static_assert(cpparg::convert_to<int>("42") == 42);
 static_assert(cpparg::convert_to<int>("-42") == -42);
 static_assert(cpparg::convert_to<unsigned int>("-1") == std::numeric_limits<unsigned int>::max());
+
+/// @brief Convert a string to `bool`.
+///
+/// Accepts "yes", "true", "on" and "1" as true,
+/// and "no", "false", "off" and "0" as false.
+///
+template<typename T>
+	requires std::same_as<std::remove_cv_t<T>, bool>
+auto convert_to(std::string_view sv) -> std::expected<T, std::errc> {
+	if (detail::iequal(sv, "yes") || detail::iequal(sv, "true") || detail::iequal(sv, "on") || sv == "1") {
+		return true;
+	}
+
+	if (detail::iequal(sv, "no") || detail::iequal(sv, "false") || detail::iequal(sv, "off") || sv == "0") {
+		return false;
+	}
+
+	return std::unexpected(std::errc::invalid_argument);
+}
 
 } // namespace cpparg
 

@@ -585,4 +585,47 @@ TEST_CASE("convert_to<unsigned>", "[cpparg]") {
 		REQUIRE(cpparg::convert_to<std::uint8_t>("-255") == 1U);
 		REQUIRE(!cpparg::convert_to<std::uint8_t>("-256"));
 	}
+
+	SECTION("invalid") {
+		REQUIRE(!cpparg::convert_to<unsigned int>(""));
+		REQUIRE(!cpparg::convert_to<unsigned int>("20h"));
+		REQUIRE(!cpparg::convert_to<unsigned int>("42 "));
+		REQUIRE(!cpparg::convert_to<unsigned int>(" 42"));
+		REQUIRE(!cpparg::convert_to<unsigned int>("x20", 16));
+		REQUIRE(!cpparg::convert_to<unsigned int>("0102010", 2));
+		REQUIRE(!cpparg::convert_to<unsigned int>("0649", 8));
+	}
+}
+
+TEST_CASE("convert_to<bool>", "[cpparg]") {
+	SECTION("simple") {
+		REQUIRE(cpparg::convert_to<bool>("yes") == true);
+		REQUIRE(cpparg::convert_to<bool>("true") == true);
+		REQUIRE(cpparg::convert_to<bool>("on") == true);
+		REQUIRE(cpparg::convert_to<bool>("1") == true);
+		REQUIRE(cpparg::convert_to<bool>("no") == false);
+		REQUIRE(cpparg::convert_to<bool>("false") == false);
+		REQUIRE(cpparg::convert_to<bool>("off") == false);
+		REQUIRE(cpparg::convert_to<bool>("0") == false);
+	}
+
+	SECTION("case") {
+		REQUIRE(cpparg::convert_to<bool>("YeS") == true);
+		REQUIRE(cpparg::convert_to<bool>("tRuE") == true);
+		REQUIRE(cpparg::convert_to<bool>("On") == true);
+		REQUIRE(cpparg::convert_to<bool>("nO") == false);
+		REQUIRE(cpparg::convert_to<bool>("FaLsE") == false);
+		REQUIRE(cpparg::convert_to<bool>("oFf") == false);
+	}
+
+	SECTION("invalid") {
+		REQUIRE(!cpparg::convert_to<bool>(""));
+		REQUIRE(!cpparg::convert_to<bool>(" true"));
+		REQUIRE(!cpparg::convert_to<bool>("true "));
+		REQUIRE(!cpparg::convert_to<bool>("yess"));
+		REQUIRE(!cpparg::convert_to<bool>("noff"));
+		REQUIRE(!cpparg::convert_to<bool>("0n"));
+		REQUIRE(!cpparg::convert_to<bool>("2"));
+		REQUIRE(!cpparg::convert_to<bool>("-1"));
+	}
 }
