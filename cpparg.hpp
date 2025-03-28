@@ -25,7 +25,6 @@
 #define CPPARG_HPP_INCLUDED
 
 #include <algorithm>
-#include <cctype>
 #include <charconv>
 #include <concepts>
 #include <cstddef>
@@ -90,11 +89,15 @@ constexpr auto word_wrap(std::string_view sv, std::size_t width) {
 	return res;
 }
 
-/// @brief Case insensitive string equality (in C locale)
-inline auto iequal(std::string_view lhs, std::string_view rhs) -> bool {
+/// @brief Case insensitive string equality (ASCII only)
+constexpr auto iequal(std::string_view lhs, std::string_view rhs) -> bool {
+	auto tolower = [](char ch) {
+		return ch >= 'A' && ch <= 'Z' ? ch - 'A' + 'a' : ch;
+	};
+
 	return std::ranges::equal(lhs, rhs,
-		[](unsigned char lch, unsigned char rch) {
-			return std::tolower(lch) == std::tolower(rch);
+		[&tolower](char lch, char rch) {
+			return tolower(lch) == tolower(rch);
 		}
 	);
 }
@@ -618,9 +621,9 @@ constexpr auto convert_to(std::string_view sv, int base = 10) -> std::expected<T
 	return static_cast<T>(negative ? (UT(0) - res) : res);
 }
 
-static_assert(cpparg::convert_to<int>("42") == 42);
-static_assert(cpparg::convert_to<int>("-42") == -42);
-static_assert(cpparg::convert_to<unsigned int>("-1") == std::numeric_limits<unsigned int>::max());
+static_assert(convert_to<int>("42") == 42);
+static_assert(convert_to<int>("-42") == -42);
+static_assert(convert_to<unsigned int>("-1") == std::numeric_limits<unsigned int>::max());
 
 /// @brief Convert a string to `bool`.
 ///
@@ -629,17 +632,24 @@ static_assert(cpparg::convert_to<unsigned int>("-1") == std::numeric_limits<unsi
 ///
 template<typename T>
 	requires std::same_as<std::remove_cv_t<T>, bool>
-auto convert_to(std::string_view sv) -> std::expected<T, std::errc> {
-	if (detail::iequal(sv, "yes") || detail::iequal(sv, "true") || detail::iequal(sv, "on") || sv == "1") {
+constexpr auto convert_to(std::string_view sv) -> std::expected<T, std::errc> {
+	using namespace std::string_view_literals;
+
+	if (detail::iequal(sv, "yes"sv) || detail::iequal(sv, "true"sv)
+	 || detail::iequal(sv, "on"sv) || detail::iequal(sv, "1"sv)) {
 		return true;
 	}
 
-	if (detail::iequal(sv, "no") || detail::iequal(sv, "false") || detail::iequal(sv, "off") || sv == "0") {
+	if (detail::iequal(sv, "no"sv) || detail::iequal(sv, "false"sv)
+	 || detail::iequal(sv, "off"sv) || detail::iequal(sv, "0"sv)) {
 		return false;
 	}
 
 	return std::unexpected(std::errc::invalid_argument);
 }
+
+static_assert(convert_to<bool>("true") == true);
+static_assert(convert_to<bool>("false") == false);
 
 } // namespace cpparg
 
