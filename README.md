@@ -153,6 +153,32 @@ Option arguments are provided as `std::string`.
     }
 ```
 
+### Converting Option Arguments
+
+`cpparg` contains a helper function template `convert_to()` which may be
+useful in converting option argument strings to integer or boolean values.
+
+It returns a `std::expected` containing either the converted value or a
+`std::errc` error code.
+
+```cpp
+    // Get option argument for "required" option, or default to "1"
+    auto required_str = result->get_last_argument_for_option("required").value_or("1");
+
+    auto required_int = cpparg::convert_to<int>(required_str);
+
+    if (!required_int) {
+        std::println(std::cerr, "error parsing int from '{}'", required_str);
+
+        return EXIT_FAILURE
+    }
+
+    std::println("required is {}", *required_int);
+```
+
+Converting to `bool` accepts "yes", "true", "on", "1" as true, and "no",
+"false", "off", "0" as false.
+
 ## Known Limitations
 
 `cpparg` parses all options at once, you cannot know the ordering between
