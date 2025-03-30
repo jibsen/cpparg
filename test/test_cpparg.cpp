@@ -123,20 +123,20 @@ TEST_CASE("double dash", "[cpparg]") {
 
 	SECTION("as arg") {
 		std::array args = {
-			"app", "-r", "--", "foo"
+			"app", "-r", "--", "-n"
 		};
 
 		auto result = default_parser.parse_argv(args.size(), args.data());
 
 		REQUIRE(result.has_value());
 
-		REQUIRE(result->get_parsed_options().size() == 1);
+		REQUIRE(result->get_parsed_options().size() == 2);
 		REQUIRE(result->get_parsed_options().front().name == "reqarg");
 		REQUIRE(result->get_parsed_options().front().arguments.size() == 1);
 		REQUIRE(result->get_parsed_options().front().arguments.front() == "--");
+		REQUIRE(result->get_parsed_options().back().name == "noarg");
 
-		REQUIRE(result->get_positional_arguments().size() == 1);
-		REQUIRE(result->get_positional_arguments().front() == "foo");
+		REQUIRE(result->get_positional_arguments().size() == 0);
 	}
 }
 
@@ -544,6 +544,16 @@ TEST_CASE("convert_to<signed>", "[cpparg]") {
 		REQUIRE(!cpparg::convert_to<std::int8_t>("128"));
 		REQUIRE(cpparg::convert_to<std::int8_t>("-128") == -128);
 		REQUIRE(!cpparg::convert_to<std::int8_t>("-129"));
+	}
+
+	SECTION("invalid") {
+		REQUIRE(!cpparg::convert_to<int>(""));
+		REQUIRE(!cpparg::convert_to<int>("20h"));
+		REQUIRE(!cpparg::convert_to<int>("42 "));
+		REQUIRE(!cpparg::convert_to<int>(" 42"));
+		REQUIRE(!cpparg::convert_to<int>("x20", 16));
+		REQUIRE(!cpparg::convert_to<int>("0102010", 2));
+		REQUIRE(!cpparg::convert_to<int>("0649", 8));
 	}
 }
 
