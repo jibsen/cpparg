@@ -52,6 +52,10 @@ TEST_CASE("app only", "[cpparg]") {
 
 	REQUIRE(result.has_value());
 
+	REQUIRE(!result->contains("optarg"));
+
+	REQUIRE(result->count("optarg") == 0);
+
 	REQUIRE(result->get_parsed_options().size() == 0);
 
 	REQUIRE(result->get_arguments_for_option("optarg").empty());
@@ -191,6 +195,9 @@ TEST_CASE("noarg", "[cpparg]") {
 
 		REQUIRE(result.has_value());
 
+		REQUIRE(result->contains("noarg"));
+		REQUIRE(result->count("noarg") == 1);
+
 		REQUIRE(result->get_parsed_options().size() == 1);
 		REQUIRE(result->get_parsed_options().front().name == "noarg");
 		REQUIRE(result->get_parsed_options().front().arguments.size() == 0);
@@ -206,6 +213,9 @@ TEST_CASE("noarg", "[cpparg]") {
 		auto result = default_parser.parse_argv(args.size(), args.data());
 
 		REQUIRE(result.has_value());
+
+		REQUIRE(result->contains("noarg"));
+		REQUIRE(result->count("noarg") == 1);
 
 		REQUIRE(result->get_parsed_options().size() == 1);
 		REQUIRE(result->get_parsed_options().front().name == "noarg");
@@ -223,6 +233,9 @@ TEST_CASE("noarg", "[cpparg]") {
 		auto result = default_parser.parse_argv(args.size(), args.data());
 
 		REQUIRE(result.has_value());
+
+		REQUIRE(result->contains("noarg"));
+		REQUIRE(result->count("noarg") == 2);
 
 		REQUIRE(result->get_parsed_options().size() == 1);
 		REQUIRE(result->get_parsed_options().front().name == "noarg");

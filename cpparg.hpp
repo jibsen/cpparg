@@ -125,6 +125,11 @@ struct ParsedOption {
 
 class ParseResult {
 public:
+	/// @brief Check if option `name` occured.
+	auto contains(std::string_view name) const -> bool {
+		return lookup.contains(std::string(name));
+	}
+
 	/// @brief Get number of times option `name` occured.
 	auto count(std::string_view name) const -> std::size_t {
 		if (auto it = lookup.find(std::string(name)); it != lookup.end()) {
