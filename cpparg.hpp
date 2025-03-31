@@ -89,15 +89,19 @@ constexpr auto word_wrap(std::string_view sv, std::size_t width) {
 	return res;
 }
 
+constexpr auto to_lower(char ch) -> char {
+	return ch >= 'A' && ch <= 'Z' ? ch - 'A' + 'a' : ch;
+}
+
+constexpr auto to_upper(char ch) -> char {
+	return ch >= 'a' && ch <= 'z' ? ch - 'a' + 'A' : ch;
+}
+
 /// @brief Case insensitive string equality (ASCII only)
 constexpr auto iequal(std::string_view lhs, std::string_view rhs) -> bool {
-	auto tolower = [](char ch) {
-		return ch >= 'A' && ch <= 'Z' ? ch - 'A' + 'a' : ch;
-	};
-
 	return std::ranges::equal(lhs, rhs,
-		[&tolower](char lch, char rch) {
-			return tolower(lch) == tolower(rch);
+		[](char lch, char rch) {
+			return to_lower(lch) == to_lower(rch);
 		}
 	);
 }
@@ -575,14 +579,12 @@ constexpr auto convert_to(std::string_view sv, int base = 10) -> std::expected<T
 		base = 10;
 
 		if (sv.starts_with('0') && sv.size() > 1) {
-			switch (sv[1]) {
+			switch (detail::to_lower(sv[1])) {
 			case 'x':
-			case 'X':
 				sv.remove_prefix(2);
 				base = 16;
 				break;
 			case 'b':
-			case 'B':
 				sv.remove_prefix(2);
 				base = 2;
 				break;
