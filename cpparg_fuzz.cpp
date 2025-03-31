@@ -54,5 +54,16 @@ auto LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) -> int
 
 	auto result = default_parser.parse_argv(args.size(), args.data());
 
+	if (result) {
+		if (auto arg = result->get_last_argument_for_option("reqarg"); arg) {
+			auto arg_signed = cpparg::convert_to<std::int8_t>(*arg, 0);
+			auto arg_unsigned = cpparg::convert_to<std::uint8_t>(*arg, 0);
+			auto arg_bool = cpparg::convert_to<bool>(*arg);
+			auto arg_kmg = cpparg::convert_to<std::int32_t, cpparg::KiloMultiplier::binary>(*arg, 0);
+
+			[[maybe_unused]] volatile bool success = arg_signed || arg_unsigned || arg_bool || arg_kmg;
+		}
+	}
+
 	return 0;
 }
