@@ -549,6 +549,13 @@ private:
 	}
 };
 
+/// @brief Multiplication factor for Kilo unit prefix.
+enum struct KiloMultiplier : unsigned int {
+	none = 1,
+	decimal = 1000,
+	binary = 1024
+};
+
 /// @brief Convert a string to integral type `T` (except `bool`).
 ///
 /// Minus is recognized for both signed and unsigned types.
@@ -557,7 +564,11 @@ private:
 /// "0x" or "0X" base is 16, if the prefix is "0b" or "0B" base is 2, if the
 /// prefix is "0" base is 8, otherwise base is 10.
 ///
-template<detail::NonBoolIntegral T>
+/// If `kilo` is `KiloMultiplier::none`, suffixes are not supported.
+/// Otherwise `kilo` is used as multiplier for suffixes K (Kilo), M (Mega),
+/// G (Giga), etc.
+///
+template<detail::NonBoolIntegral T, KiloMultiplier kilo = KiloMultiplier::none>
 constexpr auto convert_to(std::string_view sv, int base = 10) -> std::expected<T, std::errc> {
 	bool negative = false;
 
@@ -607,8 +618,51 @@ constexpr auto convert_to(std::string_view sv, int base = 10) -> std::expected<T
 		return std::unexpected(ec);
 	}
 
-	if (ptr != sv.data() + sv.size()) {
-		return std::unexpected(std::errc::invalid_argument);
+	sv.remove_prefix(ptr - sv.data());
+
+	if (!sv.empty()) {
+		if constexpr (kilo == KiloMultiplier::none) {
+			return std::unexpected(std::errc::invalid_argument);
+		}
+		else {
+			if (sv.size() != 1) {
+				return std::unexpected(std::errc::invalid_argument);
+			}
+
+			int power = 0;
+
+			switch (detail::to_upper(sv.front())) {
+			case 'K':
+				power = 1;
+				break;
+			case 'M':
+				power = 2;
+				break;
+			case 'G':
+				power = 3;
+				break;
+			case 'T':
+				power = 4;
+				break;
+			case 'P':
+				power = 5;
+				break;
+			case 'E':
+				power = 6;
+				break;
+			default:
+				return std::unexpected(std::errc::invalid_argument);
+				break;
+			}
+
+			while (power--) {
+				if (res > std::numeric_limits<UT>::max() / std::to_underlying(kilo)) {
+					return std::unexpected(std::errc::result_out_of_range);
+				}
+
+				res *= std::to_underlying(kilo);
+			}
+		}
 	}
 
 	// If T is a signed type, check that the unsigned value we read
@@ -626,6 +680,8 @@ constexpr auto convert_to(std::string_view sv, int base = 10) -> std::expected<T
 static_assert(convert_to<int>("42") == 42);
 static_assert(convert_to<int>("-42") == -42);
 static_assert(convert_to<unsigned int>("-1") == std::numeric_limits<unsigned int>::max());
+static_assert(convert_to<int, KiloMultiplier::decimal>("4K") == 4000);
+static_assert(convert_to<int, KiloMultiplier::binary>("4K") == 4096);
 
 /// @brief Convert a string to `bool`.
 ///

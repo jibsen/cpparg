@@ -555,6 +555,44 @@ TEST_CASE("convert_to<signed>", "[cpparg]") {
 		REQUIRE(!cpparg::convert_to<int>("0102010", 2));
 		REQUIRE(!cpparg::convert_to<int>("0649", 8));
 	}
+
+	SECTION("decimal suffix") {
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::decimal>("1k") == 1'000LL);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::decimal>("1K") == 1'000LL);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::decimal>("1m") == 1'000'000LL);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::decimal>("1M") == 1'000'000LL);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::decimal>("1g") == 1'000'000'000LL);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::decimal>("1G") == 1'000'000'000LL);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::decimal>("1t") == 1'000'000'000'000LL);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::decimal>("1T") == 1'000'000'000'000LL);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::decimal>("1p") == 1'000'000'000'000'000LL);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::decimal>("1P") == 1'000'000'000'000'000LL);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::decimal>("1e") == 1'000'000'000'000'000'000LL);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::decimal>("1E") == 1'000'000'000'000'000'000LL);
+		REQUIRE(cpparg::convert_to<std::int16_t, cpparg::KiloMultiplier::decimal>("32k") == 32 * 1000);
+		REQUIRE(cpparg::convert_to<std::int16_t, cpparg::KiloMultiplier::decimal>("-32k") == -32 * 1000);
+		REQUIRE(!cpparg::convert_to<std::int16_t, cpparg::KiloMultiplier::decimal>("33k"));
+		REQUIRE(!cpparg::convert_to<std::int16_t, cpparg::KiloMultiplier::decimal>("-33k"));
+	}
+
+	SECTION("binary suffix") {
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::binary>("1k") == 1LL << 10);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::binary>("1K") == 1LL << 10);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::binary>("1m") == 1LL << 20);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::binary>("1M") == 1LL << 20);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::binary>("1g") == 1LL << 30);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::binary>("1G") == 1LL << 30);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::binary>("1t") == 1LL << 40);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::binary>("1T") == 1LL << 40);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::binary>("1p") == 1LL << 50);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::binary>("1P") == 1LL << 50);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::binary>("1e") == 1LL << 60);
+		REQUIRE(cpparg::convert_to<std::int64_t, cpparg::KiloMultiplier::binary>("1E") == 1LL << 60);
+		REQUIRE(cpparg::convert_to<std::int16_t, cpparg::KiloMultiplier::binary>("31k") == 31 * 1024);
+		REQUIRE(cpparg::convert_to<std::int16_t, cpparg::KiloMultiplier::binary>("-32k") == -32 * 1024);
+		REQUIRE(!cpparg::convert_to<std::int16_t, cpparg::KiloMultiplier::binary>("32k"));
+		REQUIRE(!cpparg::convert_to<std::int16_t, cpparg::KiloMultiplier::binary>("-33k"));
+	}
 }
 
 TEST_CASE("convert_to<unsigned>", "[cpparg]") {
@@ -604,6 +642,42 @@ TEST_CASE("convert_to<unsigned>", "[cpparg]") {
 		REQUIRE(!cpparg::convert_to<unsigned int>("x20", 16));
 		REQUIRE(!cpparg::convert_to<unsigned int>("0102010", 2));
 		REQUIRE(!cpparg::convert_to<unsigned int>("0649", 8));
+	}
+
+	SECTION("decimal suffix") {
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::decimal>("1k") == 1'000LL);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::decimal>("1K") == 1'000LL);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::decimal>("1m") == 1'000'000LL);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::decimal>("1M") == 1'000'000LL);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::decimal>("1g") == 1'000'000'000LL);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::decimal>("1G") == 1'000'000'000LL);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::decimal>("1t") == 1'000'000'000'000LL);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::decimal>("1T") == 1'000'000'000'000LL);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::decimal>("1p") == 1'000'000'000'000'000LL);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::decimal>("1P") == 1'000'000'000'000'000LL);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::decimal>("1e") == 1'000'000'000'000'000'000LL);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::decimal>("1E") == 1'000'000'000'000'000'000LL);
+		REQUIRE(cpparg::convert_to<std::uint16_t, cpparg::KiloMultiplier::decimal>("65k") == 65U * 1000);
+		REQUIRE(cpparg::convert_to<std::uint16_t, cpparg::KiloMultiplier::decimal>("-65k") == static_cast<std::uint16_t>(-(65U * 1000)));
+		REQUIRE(!cpparg::convert_to<std::uint16_t, cpparg::KiloMultiplier::decimal>("66k"));
+	}
+
+	SECTION("binary suffix") {
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::binary>("1k") == 1ULL << 10);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::binary>("1K") == 1ULL << 10);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::binary>("1m") == 1ULL << 20);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::binary>("1M") == 1ULL << 20);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::binary>("1g") == 1ULL << 30);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::binary>("1G") == 1ULL << 30);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::binary>("1t") == 1ULL << 40);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::binary>("1T") == 1ULL << 40);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::binary>("1p") == 1ULL << 50);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::binary>("1P") == 1ULL << 50);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::binary>("1e") == 1ULL << 60);
+		REQUIRE(cpparg::convert_to<std::uint64_t, cpparg::KiloMultiplier::binary>("1E") == 1ULL << 60);
+		REQUIRE(cpparg::convert_to<std::uint16_t, cpparg::KiloMultiplier::binary>("63k") == 63U * 1024);
+		REQUIRE(cpparg::convert_to<std::uint16_t, cpparg::KiloMultiplier::binary>("-63k") == static_cast<std::uint16_t>(-(63U * 1024)));
+		REQUIRE(!cpparg::convert_to<std::uint16_t, cpparg::KiloMultiplier::binary>("64k"));
 	}
 }
 
