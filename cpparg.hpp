@@ -331,6 +331,11 @@ public:
 		std::string help;
 
 		for (const auto &option : options) {
+			// Omit options marked as hidden
+			if (option.description.starts_with("[hidden]")) {
+				continue;
+			}
+
 			// Add short flag or space
 			std::string option_line = option.short_flag.empty() ? "    " : std::format("  -{}", option.short_flag);
 
