@@ -82,7 +82,7 @@ constexpr auto word_wrap(std::string_view sv, std::size_t width) {
 		space_begin = next_space_begin;
 	}
 
-	if (line_start != sv.end()) {
+	if (line_start != sv.end() || sv.empty()) {
 		res.emplace_back(line_start, sv.end());
 	}
 
@@ -353,6 +353,14 @@ public:
 			// to format the description, starting with any
 			// leading space to align all the descriptions, or
 			// possibly a newline if the flags part was too long.
+
+			if (option.description.empty()) {
+				option_line.append("\n");
+
+				help.append(option_line);
+
+				continue;
+			}
 
 			// Find leading space before description for first line
 			std::size_t leading_space = flags_len;
