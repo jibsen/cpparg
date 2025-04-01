@@ -42,7 +42,7 @@ auto main(int argc, char *argv[]) -> int
 	}
 
 	// If the `help` option appeared, show help
-	if (result->count("help")) {
+	if (result->contains("help")) {
 		std::println(
 			"usage: cpparg_example [options] POSITIONAL_ARG...\n"
 			"\n"

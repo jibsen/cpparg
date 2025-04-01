@@ -94,6 +94,7 @@ which is a string describing the error.
 
 `cpparg::ParseResult` has a number of functions:
 
+  - `contains("name")` returns true if option `name` occured
   - `count("name")` returns the number of times option `name` occured
   - `get_last_argument_for_option("name")` returns an optional containing
     the last option argument given for option `name`, if any
@@ -112,7 +113,7 @@ Option arguments are provided as `std::string`.
 
 ```cpp
     // If the `help` option appeared, show help
-    if (result->count("help")) {
+    if (result->contains("help")) {
         std::println(
             "usage: cpparg_example [options] POSITIONAL_ARG...\n"
             "\n"
